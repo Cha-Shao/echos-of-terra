@@ -49,12 +49,45 @@ const MapMenu = () => {
       }
     }
 
-    addEventListener("wheel", handleZoom)
+
+    document.addEventListener("wheel", handleZoom)
 
     return () => {
       removeEventListener("wheel", handleZoom)
     }
-  }, [])
+  }, [scale])
+
+  useEffect(() => {
+    const handleMouseDown = () => {
+      setDragging(true)
+    }
+    const handleMouseUp = () => {
+      console.log("mouseup")
+      setDragging(false)
+    }
+    const handleMove = (e: MouseEvent) => {
+      if (dragging) {
+        setPosition(prev => ({
+          x: prev.x + (e.movementX),
+          y: prev.y + (e.movementY),
+        }))
+      }
+    }
+
+    document.addEventListener("pointerdown", handleMouseDown)
+    document.addEventListener("pointerup", handleMouseUp)
+    document.addEventListener("pointerleave", handleMouseUp)
+    document.addEventListener("pointermove", handleMove)
+
+    return () => {
+      document.removeEventListener("pointerdown", handleMouseDown)
+      document.removeEventListener("pointerup", handleMouseUp)
+      document.removeEventListener("pointerleave", handleMouseUp)
+      document.removeEventListener("pointermove", handleMove)
+    }
+  }, [dragging])
+
+  useEffect(() => console.log(dragging), [position, dragging])
 
   useEffect(() => {
     const dictLevel = 4 - Math.floor((zoom + 8) / 16)
@@ -64,6 +97,53 @@ const MapMenu = () => {
 
     console.log(zoom, dictLevel, scale)
   }, [zoom])
+
+  useEffect(() => {
+    let lastDistance = 0
+    let isPinching = false
+
+    const getDistance = (touches: TouchList) => {
+      const [a, b] = [touches[0], touches[1]]
+      return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)
+    }
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        isPinching = true
+        lastDistance = getDistance(e.touches)
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isPinching && e.touches.length === 2) {
+        const newDistance = getDistance(e.touches)
+        if (Math.abs(newDistance - lastDistance) > 5) { // 阈值防抖
+          if (newDistance > lastDistance) {
+            zoomController({ type: "zoomIn" })
+          } else {
+            zoomController({ type: "zoomOut" })
+          }
+          lastDistance = newDistance
+        }
+      }
+    }
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) {
+        isPinching = false
+      }
+    }
+
+    document.addEventListener("touchstart", handleTouchStart, { passive: false })
+    document.addEventListener("touchmove", handleTouchMove, { passive: false })
+    document.addEventListener("touchend", handleTouchEnd, { passive: false })
+
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart)
+      document.removeEventListener("touchmove", handleTouchMove)
+      document.removeEventListener("touchend", handleTouchEnd)
+    }
+  }, [])
 
   return (
     <pixiContainer
