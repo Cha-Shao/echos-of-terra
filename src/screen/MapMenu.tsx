@@ -1,4 +1,4 @@
-import { extend, useApplication } from "@pixi/react"
+import { extend } from "@pixi/react"
 import {
   Container,
   Graphics,
@@ -18,60 +18,66 @@ interface Position {
   x: number
   y: number
 }
-type ZoomLevel = 0 | 1 | 2 | 3 | 4
+type DictLevel = 0 | 1 | 2 | 3 | 4
 
 const MapMenu = () => {
-  const { app } = useApplication()
-
   const [zoom, zoomController] = useReducer(
     (state: number, action: { type: "zoomIn" | "zoomOut" }) => {
       const newState = state + (action.type === "zoomIn" ? 1 : -1)
       switch (action.type) {
         case "zoomIn":
-          return Math.min(newState, 64)
+          return Math.min(newState, 63)
         case "zoomOut":
-          return Math.max(newState, 1)
+          return Math.max(newState, -7)
         default:
           return state
       }
     },
-    32,
+    0,
   )
-  const [scaleLevel, setScaleLevel] = useState<ZoomLevel>(0)
+  const [dictLevel, setDictLevel] = useState<DictLevel>(0)
+  const [scale, setScale] = useState<number>(0)
   const [dragging, setDragging] = useState<boolean>(false)
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 })
 
   useEffect(() => {
-    addEventListener("wheel", (e: WheelEvent) => {
+    const handleZoom = (e: WheelEvent) => {
       if (e.deltaY < 0) {
-        zoomController({ type: "zoomOut" })
-      } else {
         zoomController({ type: "zoomIn" })
+      } else {
+        zoomController({ type: "zoomOut" })
       }
-    })
+    }
+
+    addEventListener("wheel", handleZoom)
+
+    return () => {
+      removeEventListener("wheel", handleZoom)
+    }
   }, [])
 
   useEffect(() => {
-    setScaleLevel(Math.floor((zoom + 8) / 16) as ZoomLevel)
-    console.log("Zoom level changed:", scaleLevel)
-  }, [scaleLevel, zoom])
+    const dictLevel = 4 - Math.floor((zoom + 8) / 16)
+    setDictLevel(dictLevel as DictLevel)
+    const scale = 1 + ((zoom + 8) % 16 + 1) / 16
+    setScale(scale)
+
+    console.log(zoom, dictLevel, scale)
+  }, [zoom])
 
   return (
     <pixiContainer
       position={position}
-      // scale={2 - (zoom % 16) / 16}
-      scale={0.5}
+      scale={scale}
       x={window.innerWidth / 2}
       y={window.innerHeight / 2}
     >
       {data.region.map(region => {
-        const blockDict = region.blockDict[scaleLevel]
+        const blockDict = region.blockDict[dictLevel]
 
         return blockDict && (
           <pixiContainer
             key={region.id}
-            // x={region.offset?.x || 0}
-            // y={region.offset?.y || 0}
             x={0}
             y={0}
             zIndex={region.zIndex}
