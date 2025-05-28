@@ -96,8 +96,7 @@ const MapMenu = () => {
   useEffect(() => {
     const dictLevel = Math.min(4, 4 - Math.floor((zoom + 6) / 14))
     setDictLevel(dictLevel as DictLevel)
-    // const scale = 1 + (zoom + 6) % 14 / 14
-    const scale = 1
+    const scale = 0.5 + (zoom + 6) % 14 / 14
     setScale(scale)
 
     console.log(zoom, dictLevel, scale)
