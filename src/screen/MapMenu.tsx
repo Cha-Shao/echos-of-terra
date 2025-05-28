@@ -71,6 +71,7 @@ const MapMenu = () => {
       scale={scale}
       x={window.innerWidth / 2}
       y={window.innerHeight / 2}
+      anchor={0.5}
     >
       {data.region.map(region => {
         const blockDict = region.blockDict[dictLevel]
@@ -78,9 +79,8 @@ const MapMenu = () => {
         return blockDict && (
           <pixiContainer
             key={region.id}
-            x={0}
-            y={0}
             zIndex={region.zIndex}
+            anchor={0.5}
           >
             {blockDict.map(block => (
               <Block
