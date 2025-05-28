@@ -19,13 +19,6 @@ interface Position {
   y: number
 }
 type ZoomLevel = 0 | 1 | 2 | 3 | 4
-const offsetMultiple = [
-  1,
-  512,
-  256,
-  170.5,
-  64,
-]
 
 const MapMenu = () => {
   const { app } = useApplication()
@@ -49,24 +42,25 @@ const MapMenu = () => {
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 })
 
   useEffect(() => {
-    app.canvas.addEventListener("wheel", (e: WheelEvent) => {
-      e.preventDefault()
+    addEventListener("wheel", (e: WheelEvent) => {
       if (e.deltaY < 0) {
         zoomController({ type: "zoomOut" })
       } else {
         zoomController({ type: "zoomIn" })
       }
     })
-  }, [app])
+  }, [])
 
   useEffect(() => {
     setScaleLevel(Math.floor((zoom + 8) / 16) as ZoomLevel)
+    console.log("Zoom level changed:", scaleLevel)
   }, [scaleLevel, zoom])
 
   return (
     <pixiContainer
       position={position}
-      scale={2 - (zoom % 16) / 16}
+      // scale={2 - (zoom % 16) / 16}
+      scale={0.5}
       x={window.innerWidth / 2}
       y={window.innerHeight / 2}
     >
@@ -86,8 +80,8 @@ const MapMenu = () => {
               <Block
                 key={block.key}
                 textureUrl={`/blocks/${block.key}.png`}
-                x={block.pos.x * (scaleLevel * offsetMultiple[scaleLevel])}
-                y={block.pos.y * (scaleLevel * offsetMultiple[scaleLevel])}
+                x={block.pos.x * 512}
+                y={block.pos.y * 512}
               />
             ))}
           </pixiContainer>
