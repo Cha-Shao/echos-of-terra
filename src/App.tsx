@@ -4,7 +4,7 @@ import MapMenu from "./screen/MapMenu"
 import { Application } from "@pixi/react"
 
 function App() {
-  const [start, setStart] = useState<boolean>(true)
+  const [start] = useState<boolean>(true)
 
   useEffect(() => {
     const bodyEl = document.querySelector("body")
@@ -35,7 +35,7 @@ function App() {
         </Application>
       ) : (
         <MainMenu
-          onStart={() => setStart(true)}
+        // onStart={() => setStart(true)}
         />
       )}
     </main>

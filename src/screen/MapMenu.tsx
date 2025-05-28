@@ -1,4 +1,4 @@
-import { extend } from "@pixi/react"
+import { extend, useApplication } from "@pixi/react"
 import {
   Container,
   Graphics,
@@ -21,6 +21,8 @@ interface Position {
 type DictLevel = 0 | 1 | 2 | 3 | 4
 
 const MapMenu = () => {
+  const { app } = useApplication()
+
   const [zoom, zoomController] = useReducer(
     (state: number, action: { type: "zoomIn" | "zoomOut" }) => {
       const newState = state + (action.type === "zoomIn" ? 1 : -1)
@@ -28,7 +30,7 @@ const MapMenu = () => {
         case "zoomIn":
           return Math.min(newState, 63)
         case "zoomOut":
-          return Math.max(newState, -7)
+          return Math.max(newState, 0)
         default:
           return state
       }
@@ -37,8 +39,10 @@ const MapMenu = () => {
   )
   const [dictLevel, setDictLevel] = useState<DictLevel>(0)
   const [scale, setScale] = useState<number>(0)
-  const [dragging, setDragging] = useState<boolean>(false)
-  const [position, setPosition] = useState<Position>({ x: 0, y: 0 })
+  const [position, setPosition] = useState<Position>({
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2
+  })
 
   useEffect(() => {
     const handleZoom = (e: WheelEvent) => {
@@ -55,15 +59,17 @@ const MapMenu = () => {
     return () => {
       removeEventListener("wheel", handleZoom)
     }
-  }, [scale])
+  }, [app])
 
   useEffect(() => {
+    let dragging = false
+
     const handleMouseDown = () => {
-      setDragging(true)
+      dragging = true
     }
     const handleMouseUp = () => {
       console.log("mouseup")
-      setDragging(false)
+      dragging = false
     }
     const handleMove = (e: MouseEvent) => {
       if (dragging) {
@@ -85,14 +91,13 @@ const MapMenu = () => {
       document.removeEventListener("pointerleave", handleMouseUp)
       document.removeEventListener("pointermove", handleMove)
     }
-  }, [dragging])
-
-  useEffect(() => console.log(dragging), [position, dragging])
+  }, [app])
 
   useEffect(() => {
-    const dictLevel = 4 - Math.floor((zoom + 8) / 16)
+    const dictLevel = Math.min(4, 4 - Math.floor((zoom + 6) / 14))
     setDictLevel(dictLevel as DictLevel)
-    const scale = 1 + ((zoom + 8) % 16 + 1) / 16
+    // const scale = 1 + (zoom + 6) % 14 / 14
+    const scale = 1
     setScale(scale)
 
     console.log(zoom, dictLevel, scale)
@@ -143,7 +148,7 @@ const MapMenu = () => {
       document.removeEventListener("touchmove", handleTouchMove)
       document.removeEventListener("touchend", handleTouchEnd)
     }
-  }, [])
+  }, [app])
 
   return (
     <pixiContainer

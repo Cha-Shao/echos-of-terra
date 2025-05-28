@@ -1,8 +1,4 @@
-const MainMenu = ({
-  onStart
-}: {
-  onStart: () => void
-}) => {
+const MainMenu = () => {
   const footerCountries = Object.entries(
     import.meta.glob(
       "../assets/images/footer/*.png",
