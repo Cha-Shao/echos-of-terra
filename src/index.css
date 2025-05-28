@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+html body {
+  background-color: #fefefe;
+  background-image: url("./assets/images/background.56520e.jpg");
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+}
+
+@font-face {
+  font-family: Bender-Regular;
+  src: url(./assets/fonts//Bender-Regular.e85703.ttf);
+}
